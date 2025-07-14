@@ -45,18 +45,18 @@ def caesarCipher(shift: int = 0,
                  encrypt:bool = True) -> str:
     shifted = ""
     if encrypt:
-        for character in text:
-            if not character.isalpha():
-                shifted += character
+        for glyph in text:
+            if not glyph.isalpha():
+                shifted += glyph
                 continue
-            if character.isspace():
+            if glyph.isspace():
                 shifted += " "
                 continue
-            if character.islower():
-                shifted += list("abcdefghijklmnopqrstuvwxyz")[(list("abcdefghijklmnopqrstuvwxyz").index(character) + shift) % 26]
+            if glyph.islower():
+                shifted += list("abcdefghijklmnopqrstuvwxyz")[(list("abcdefghijklmnopqrstuvwxyz").index(glyph) + shift) % 26]
                 continue
-            if character.isupper():
-                shifted += [letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")][([letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")].index(character) + shift) % 26]
+            if glyph.isupper():
+                shifted += [letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")][([letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")].index(glyph) + shift) % 26]
                 continue
         return shifted
     if not encrypt:
@@ -93,7 +93,7 @@ def bruteDecryptCaesar(shifted:str) -> tuple:
 def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
     results = []
     for attempt in allSols:
-        attemptStrip = myStrip(attempt, "!?.,'")
+        attemptStrip = myStrip(attempt, "!?.,'_-")
         attemptList = attemptStrip.split()
         validWords = 0
         totalWords = len(attemptList)
@@ -113,7 +113,7 @@ def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
 ## to decrypt a Caesar cipher with an unknown shift value.
 def grabLeastWrongCaesar(results:tuple) -> str:
     returnStat = []
-    validities = [attempt[1] for attempt in results if attempt[1] != "Validity: 0.0"]
+    validities = [attempt[1] for attempt in results]
     highestValidities = tuple(max(validities) for i in range(validities.count(max(validities))))
     for value in highestValidities:
         returnStat.append(results[validities.index(value)][0])
@@ -153,7 +153,7 @@ def decryptCaesar(shifted:str) -> str:
     # Checks validity of every word against web2List.txt,
     # and appends validity value to the decryption itself 
     for attempt in allSols:
-        attemptStrip = myStrip(attempt, "!?.,'")
+        attemptStrip = myStrip(attempt, """!?.,"'_-()[]{}<>\/""")
         attemptList = attemptStrip.split()
         validWords = 0
         totalWords = len(attemptList)
@@ -163,7 +163,7 @@ def decryptCaesar(shifted:str) -> str:
         results.append((attempt, "Validity: " + str(round(validWords / totalWords, 2))))
     
     # Finds the validities of each decryption and finds the highest value(s)
-    validities = [attempt[1] for attempt in results if attempt[1] != "Validity: 0.0"]
+    validities = [attempt[1] for attempt in results]
     highestValidities = tuple(max(validities) for i in range(validities.count(max(validities))))
 
     # Creates a list of all decryptions with equal and highest validities,
@@ -175,7 +175,7 @@ def decryptCaesar(shifted:str) -> str:
 
     # Return messages for 1, 0, or more than one highest validity values
     if len(highestValidities) == 1:
-        return "The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0]
+        return f"The most likely answer had a shift of {str(results.index(leastWrong) + 1)} and a validity of {leastWrong[1][12:]}%:\n{leastWrong[0]}"
     elif len(highestValidities) == 0:
         return "Something went really wrong, maybe try again?"
     elif len(highestValidities) > 1:
@@ -184,9 +184,9 @@ def decryptCaesar(shifted:str) -> str:
 
 # Test Cases
 ## Setting text easily, as well as the shift value.
-text = "Hi, my name's not a cipher"
 shift = 13
-encryptedText = caesarCipher(shift, text, encrypt = True)
+encryptedText = "cvpbPGS{abg_gbb_onq_bs_n_ceboyrz}"
+text = caesarCipher(-shift, encryptedText, encrypt = True) 
 
 ## Testing encryption and decryption function, provided the shift is known.
 ### Testing encryption
