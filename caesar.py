@@ -1,5 +1,5 @@
 from english_words import get_english_words_set # type: ignore
-web2 = get_english_words_set(['web2'])#, lower=True)
+web2 = get_english_words_set(['web2'])
 
 with open("web2List.txt", "r") as web2file:
     web2List = web2file.read().split()
