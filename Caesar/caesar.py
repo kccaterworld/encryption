@@ -2,14 +2,14 @@
 # common English words, web2List.txt.
 # Proceeds to split it into a list to be used to check
 # validity of words in the decrypted text. 
-with open("web2List.txt", "r") as web2file:
+with open("caesar/web2List.txt", "r") as web2file:
     web2List = web2file.read().split()
 
 # Reads the second of two files containing a list of
 # common English words, words_pos.csv.
 # Proceeds to split it into a list to be used to check
 # validity of words in the decrypted text.
-with open("words_pos.csv", "r") as words_pos:
+with open("caesar/words_pos.csv", "r") as words_pos:
     words_pos = words_pos.read()
     wordsSplit = words_pos.split("\n")
     wordsPosList = [line.split(",")[1] for line in wordsSplit[1:-1]]
@@ -185,7 +185,7 @@ def decryptCaesar(shifted:str) -> str:
 # Test Cases
 ## Setting text easily, as well as the shift value.
 shift = 13
-encryptedText = "cvpbPGS{abg_gbb_onq_bs_n_ceboyrz}"
+encryptedText = "jfiy pz mbu"
 text = caesarCipher(-shift, encryptedText, encrypt = True) 
 
 ## Testing encryption and decryption function, provided the shift is known.
