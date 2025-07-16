@@ -1,3 +1,5 @@
+import pycryptodome
+
 # Helper functions
 ## keyToeN(string) -> tuple
 ## Takes in the path to a file containing a
@@ -10,17 +12,21 @@
 def pubKeyToeN(file: str | None = None, key: str | int | None = None):
     if (file == None) and (key == None):
         raise ValueError("Either file or key must be provided")
+    if (file != None) and (key != None):
+        raise ValueError("Only one of file or key can be provided")
     #TODO: Figure out how the hell to go from long ahh key to a and N
 
 def privKeyTodN(file: str | None = None, key: str | int | None = None):
-    ... #TODO: idfk
+    if (file == None) and (key == None):
+        raise ValueError("Either file or key must be provided")
+    if (file != None) and (key != None):
+        raise ValueError("Only one of file or key can be provided")
+    #TODO: idfk
 
 def rsaEncrypt(plaintext, key: tuple | str | int):
     if type(key) == tuple:
         ciphertext = (plaintext ** key[0]) % key[1]
-    if type(key) == str:
-        ciphertext = (plaintext ** pubKeyToeN(key)[0]) % pubKeyToeN(key)[1]
-    if type(key) == int:
+    if (type(key) == str) or (type(key) == int):
         ciphertext = (plaintext ** pubKeyToeN(key)[0]) % pubKeyToeN(key)[1]
     if (type(key) != str) and (type(key) != int) and (type(key) != tuple):
         raise TypeError("Invalid key type")
@@ -28,11 +34,9 @@ def rsaEncrypt(plaintext, key: tuple | str | int):
 
 def rsaDecrypt(ciphertext, key: tuple | str | int):
     if type(key) == tuple:
-        ...
-    if type(key) == str:
-        ...
-    if type(key) == int:
-        ...
+        plaintext = (ciphertext ** key[0]) % key[1]
+    if (type(key) == str) or (type(key) == int):
+        plaintext = (ciphertext ** privKeyTodN(key)[0]) % privKeyTodN(key)[1]
     if (type(key) != str) and (type(key) != int) and (type(key) != tuple):
         raise TypeError("Invalid key type")
     return ciphertext
