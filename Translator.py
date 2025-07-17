@@ -89,6 +89,9 @@ base64 = {"A":0,
           "/":63,
           "=":""}
 def base64Translate():
+    base64_binary()
+
+def base64_binary():
     res = 0
     base64Val = input("Base64 value? ")
     for digit in base64Val:
@@ -101,6 +104,6 @@ def base64Translate():
 
 cipherType = input("What kind of cipher?")
 if cipherType == "Hexadecimal":
-    hexTranslate()
+    print(hexTranslate())
 elif cipherType == "Base64":
     print(base64Translate())
