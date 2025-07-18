@@ -123,8 +123,8 @@ def grabLeastWrongCaesar(results:tuple) -> str:
     elif len(highestValidities) == 0:
         return "Something went really wrong, maybe try again?"
     elif len(highestValidities) > 1:
-        multMaybe = "".join(returnStat + "\n")
-        return f"There were {len(highestValidities)} answers with similar probabilities:\n {multMaybe}"
+        multHighest = "".join(leastWrong + ("\n", " "))
+        return f"There were {len(highestValidities)} answers with similar probabilities:\n {multHighest}"
 
 # decryptCaesar(string) -> string
 # Takes in a string encrypted with a Caesar cipher,
@@ -179,13 +179,13 @@ def decryptCaesar(shifted:str) -> str:
     elif len(highestValidities) == 0:
         return "Something went really wrong, maybe try again?"
     elif len(highestValidities) > 1:
-        multMaybe = "".join(returnStat + "\n")
+        multMaybe = "".join(leastWrong + ("\n", " "))
         return f"There were {len(highestValidities)} answers with similar probabilities:\n {multMaybe}"
 
 # Test Cases
 ## Setting text easily, as well as the shift value.
 shift = 13
-encryptedText = "jfiy pz mbu"
+encryptedText = "cswzvomszrobckbozkcddrosbzbswo"
 text = caesarCipher(-shift, encryptedText, encrypt = True) 
 
 ## Testing encryption and decryption function, provided the shift is known.
