@@ -1,12 +1,13 @@
 import os
 import string
+import time
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # Finds all the files with word lists in the WordLists directory
 wordListFiles = os.listdir("WordLists")
 # Creates a set of all the words in the files in wordListFiles, all lowercase
 words = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
 
-chars = "!?.,'_-"
+chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
 
 # caesarCipher(integer, string, bool) -> string
 # Takes in a string to be encrypted or decrypted, a
@@ -21,8 +22,7 @@ chars = "!?.,'_-"
 # Decrypt just recursively calls caesarCipher with a negative shift value.
 def caesarCipher(shift: int = 0,
                  text:str = "",
-                 encrypt:bool = True,
-                 debug:bool=False) -> str | tuple:
+                 encrypt:bool = True) -> str | tuple:
     shifted = ""
     if encrypt:
         for glyph in text:
@@ -33,10 +33,10 @@ def caesarCipher(shift: int = 0,
                 shifted += " "
                 continue
             if glyph.islower():
-                shifted += list("abcdefghijklmnopqrstuvwxyz")[(list("abcdefghijklmnopqrstuvwxyz").index(glyph) + shift) % 26]
+                shifted += string.ascii_lowercase[(string.ascii_lowercase.index(glyph) + shift) % 26]
                 continue
             if glyph.isupper():
-                shifted += [letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")][([letter.upper() for letter in list("abcdefghijklmnopqrstuvwxyz")].index(glyph) + shift) % 26]
+                shifted += string.ascii_uppercase[(string.ascii_uppercase.index(glyph) + shift) % 26]
                 continue
         return shifted
     if not encrypt:
@@ -51,11 +51,8 @@ def caesarCipher(shift: int = 0,
 # The first of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def bruteDecryptCaesar(shifted:str, debug:bool=False) -> tuple:
-    allSols = []
-    for shiftVal in range(1, 27):
-        allSols.append(caesarCipher(shiftVal, shifted, False))
-    allSols = tuple(allSols)
+def bruteDecryptCaesar(shifted:str) -> tuple:
+    allSols = tuple(caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27))
     return allSols
 
 # testCaesarDecrypt(tuple) -> tuple
@@ -69,7 +66,7 @@ def bruteDecryptCaesar(shifted:str, debug:bool=False) -> tuple:
 # The second of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def testCaesarDecrypt(allSols:tuple , debug:bool=False) -> tuple[str, float] | tuple:
+def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
     results = []
     allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
@@ -82,8 +79,8 @@ def testCaesarDecrypt(allSols:tuple , debug:bool=False) -> tuple[str, float] | t
             if word.lower().strip() in words:
                 validWords += 1
         results.append((attempt, allPermsVals[allSols.index(attempt)], round(validWords / totalWords, 2)))
-    #results.append(allPermsVals)
     return results
+
 
 # grabLeastWrongCaesar(tuple) -> str
 # Takes in a tuple of decryptions and their validities,
@@ -93,7 +90,7 @@ def testCaesarDecrypt(allSols:tuple , debug:bool=False) -> tuple[str, float] | t
 # The third and final function used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def grabLeastWrongCaesar(results:tuple, debug:bool=False) -> str | tuple:
+def grabLeastWrongCaesar(results:tuple) -> str:
     returnStat = []
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
@@ -164,7 +161,7 @@ def decryptCaesar(shifted:str) -> str:
 if __name__ == "__main__":
     ## Setting text easily, as well as the shift value.
     shift = 13
-    encryptedText = "cswzvomszrobckbozkcddrosbzbswo"
+    encryptedText = "Hello, World!"
     text = caesarCipher(-shift, encryptedText, encrypt = True) 
 
     ## Testing encryption and decryption function, provided the shift is known.
