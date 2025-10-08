@@ -51,7 +51,7 @@ def caesarCipher(shift: int = 0,
 # The first of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def bruteDecryptCaesar(shifted:str) -> tuple:
+def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
     allSols = tuple(caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27))
     return allSols
 
@@ -66,7 +66,7 @@ def bruteDecryptCaesar(shifted:str) -> tuple:
 # The second of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
+def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
     results = []
     allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
@@ -90,7 +90,7 @@ def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
 # The third and final function used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def grabLeastWrongCaesar(results:tuple) -> str:
+def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
     returnStat = []
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
@@ -98,12 +98,12 @@ def grabLeastWrongCaesar(results:tuple) -> str:
         returnStat.append(results[validities.index(value[1])][0])
     leastWrong = results[validities.index(max(validities))]
     if len(highestValidities) == 1:
-        return "The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0]
+        return ("The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0],)
     elif len(highestValidities) > 1:
-        multHighest = ""
+        multHighest = [f"There were {len(highestValidities)} answers with similar probabilities:"]
         for answer in highestValidities:
-            multHighest += f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}\n"
-        return f"There were {len(highestValidities)} answers with similar probabilities:\n{multHighest}"
+            multHighest.append(f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}")
+        return multHighest
 
 # decryptCaesar(string) -> string
 # Takes in a string encrypted with a Caesar cipher,
@@ -117,7 +117,7 @@ def grabLeastWrongCaesar(results:tuple) -> str:
 ## which are: bruteDecryptCaesar, testCaesarDecrypt,
 ## and grabLeastWrongCaesar. decryptCaesar removes the need
 ## for three different functions and nested calls.
-def decryptCaesar(shifted:str) -> str:
+def decryptCaesar(shifted:str, **kwargs) -> str:
     # Setting empty lists
     allSols = []
     results = []
@@ -152,10 +152,10 @@ def decryptCaesar(shifted:str) -> str:
     if len(highestValidities) == 1:
         return "The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0]
     elif len(highestValidities) > 1:
-        multHighest = ""
+        multHighest = [f"There were {len(highestValidities)} answers with similar probabilities:"]
         for answer in highestValidities:
-            multHighest += f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}\n"
-        return f"There were {len(highestValidities)} answers with similar probabilities:\n{multHighest}"
+            multHighest.append(f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}")
+        return multHighest
     
 
 if __name__ == "__main__":
@@ -167,11 +167,13 @@ if __name__ == "__main__":
     ## Testing encryption and decryption function, provided the shift is known.
     ### Testing encryption
     print(f"Encrypting '{text}' with a shift of {shift}:")
+    print("caesarCipher(shift, text, encrypt = True)")
     print(f"Test:   " + caesarCipher(shift, text, encrypt = True))
     print(f"Actual: {encryptedText}")
 
     ### Testing decryption
     print(f"\nDecrypting the previously encrypted text:")
+    print("caesarCipher(shift, encryptedText, encrypt = False)")
     print(f"Test:   " + caesarCipher(shift, encryptedText, encrypt = False))
     print(f"Actual: {text}")
 
@@ -179,18 +181,26 @@ if __name__ == "__main__":
     ### Testing bruteDecryptCaesar, the first of three
     ### composite functions that make up decryptCaesar
     print(f"\nAll possible decryptions of the previously encrypted text:")
-    print(*bruteDecryptCaesar(encryptedText), sep="\n")
+    print("bruteDecryptCaesar(encryptedText, debug=False)")
+    brute = bruteDecryptCaesar(encryptedText, debug=False)
+    print(*brute, sep="\n")
 
     ### Testing testCaesarDecrypt, the second of three
     ### composite functions that make up decryptCaesar
     print(f"\nAll possible decryptions of the previously encrypted text and their validities:")
-    print(*testCaesarDecrypt(bruteDecryptCaesar(encryptedText)), sep="\n")
+    print("testCaesarDecrypt(bruteDecryptCaesar(encryptedText, debug=False), debug=False)")
+    test = testCaesarDecrypt(brute, debug=False)
+    print(*test, sep="\n")
 
     ### Testing grabLeastWrongCaesar, the third of three
     ### composite functions that make up decryptCaesar
     print(f"\nMost likely decryption of the previously encrypted text and its shift value:")
-    print(grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText))))
+    print("grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText, debug=False), debug=False), debug=False)")
+    least = grabLeastWrongCaesar(test, debug=False)
+    print(*least, sep="\n")
 
     ### Testing decryptCaesar, the main function that compiles the results
     print(f"\nDecrypted text and its validity:")
-    print(decryptCaesar(encryptedText))
+    print("decryptCaesar(encryptedText, debug=False)")
+    decrypt = decryptCaesar(encryptedText, debug=False)
+    print(*decrypt, sep="\n")
