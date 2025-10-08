@@ -1,9 +1,10 @@
 import os
+import string
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# Finds all the files with word lists in the WordLists directory
 wordListFiles = os.listdir("WordLists")
-words = set()
-for wordList in wordListFiles:
-    [words.add(word) for word in open(f"WordLists/{wordList}", 'r').read().split()]
+# Creates a set of all the words in the files in wordListFiles, all lowercase
+words = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
 
 chars = "!?.,'_-"
 
