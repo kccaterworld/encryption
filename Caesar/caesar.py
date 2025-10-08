@@ -1,23 +1,11 @@
 import os
-wordListFiles = os.listdir("Caesar/WordLists")
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+wordListFiles = os.listdir("WordLists")
 words = set()
-lens = []
 for wordList in wordListFiles:
-    [words.add(word) for word in open(f"Caesar/WordLists/{wordList}", 'r').read().split()]
-    lens.append(len(words))
+    [words.add(word) for word in open(f"WordLists/{wordList}", 'r').read().split()]
 
-
-# myStrip(string, string) -> string
-# Takes in a string and a string of characters,
-## and replaces every instance of the characters in the string
-## with a space, then strips the string of leading
-## and trailing whitespace.
-# Outputs the modified string.
-# This is used to remove punctuation and other characters
-# Used in my decryptCaesar function to remove punctuation
-## for checking against the word bank.
-def myStrip(text, chars):
-    return text.translate(str.maketrans('', '', chars))
+chars = "!?.,'_-"
 
 # caesarCipher(integer, string, bool) -> string
 # Takes in a string to be encrypted or decrypted, a
@@ -32,7 +20,8 @@ def myStrip(text, chars):
 # Decrypt just recursively calls caesarCipher with a negative shift value.
 def caesarCipher(shift: int = 0,
                  text:str = "",
-                 encrypt:bool = True) -> str:
+                 encrypt:bool = True,
+                 debug:bool=False) -> str | tuple:
     shifted = ""
     if encrypt:
         for glyph in text:
@@ -61,7 +50,7 @@ def caesarCipher(shift: int = 0,
 # The first of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def bruteDecryptCaesar(shifted:str) -> tuple:
+def bruteDecryptCaesar(shifted:str, debug:bool=False) -> tuple:
     allSols = []
     for shiftVal in range(1, 27):
         allSols.append(caesarCipher(shiftVal, shifted, False))
@@ -79,12 +68,12 @@ def bruteDecryptCaesar(shifted:str) -> tuple:
 # The second of three functions used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
+def testCaesarDecrypt(allSols:tuple , debug:bool=False) -> tuple[str, float] | tuple:
     results = []
     allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
     for attempt in allSols:
-        attemptStrip = myStrip(attempt, "!?.,'_-")
+        attemptStrip = attempt.translate(str.maketrans('', '', chars))
         attemptList = attemptStrip.split()
         validWords = 0
         totalWords = len(attemptList)
@@ -103,7 +92,7 @@ def testCaesarDecrypt(allSols:tuple) -> tuple[str, float]:
 # The third and final function used in decryptCaesar,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
-def grabLeastWrongCaesar(results:tuple) -> str:
+def grabLeastWrongCaesar(results:tuple, debug:bool=False) -> str | tuple:
     returnStat = []
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
@@ -144,10 +133,10 @@ def decryptCaesar(shifted:str) -> str:
 
     # Checks validity of every word against web2List.txt,
     # and appends validity value to the decryption itself 
-    allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
+    allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i, len(attempt))] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
     for attempt in allSols:
-        attemptStrip = myStrip(attempt, "!?.,'_-")
+        attemptStrip = attempt.translate(str.maketrans('', '', chars))
         attemptList = attemptStrip.split()
         validWords = 0
         totalWords = len(attemptList)
@@ -171,39 +160,39 @@ def decryptCaesar(shifted:str) -> str:
         return f"There were {len(highestValidities)} answers with similar probabilities:\n{multHighest}"
     
 
-# Test Cases
-## Setting text easily, as well as the shift value.
-shift = 13
-encryptedText = "cswzvomszrobckbozkcddrosbzbswo"
-text = caesarCipher(-shift, encryptedText, encrypt = True) 
+if __name__ == "__main__":
+    ## Setting text easily, as well as the shift value.
+    shift = 13
+    encryptedText = "cswzvomszrobckbozkcddrosbzbswo"
+    text = caesarCipher(-shift, encryptedText, encrypt = True) 
 
-## Testing encryption and decryption function, provided the shift is known.
-### Testing encryption
-print(f"Encrypting '{text}' with a shift of {shift}:")
-print(f"Test:   " + caesarCipher(shift, text, encrypt = True))
-print(f"Actual: {encryptedText}")
+    ## Testing encryption and decryption function, provided the shift is known.
+    ### Testing encryption
+    print(f"Encrypting '{text}' with a shift of {shift}:")
+    print(f"Test:   " + caesarCipher(shift, text, encrypt = True))
+    print(f"Actual: {encryptedText}")
 
-### Testing decryption
-print(f"\nDecrypting the previously encrypted text:")
-print(f"Test:   " + caesarCipher(shift, encryptedText, encrypt = False))
-print(f"Actual: {text}")
+    ### Testing decryption
+    print(f"\nDecrypting the previously encrypted text:")
+    print(f"Test:   " + caesarCipher(shift, encryptedText, encrypt = False))
+    print(f"Actual: {text}")
 
-## Testing the solving function
-### Testing bruteDecryptCaesar, the first of three
-### composite functions that make up decryptCaesar
-print(f"\nAll possible decryptions of the previously encrypted text:")
-print(*bruteDecryptCaesar(encryptedText), sep="\n")
+    ## Testing the solving function
+    ### Testing bruteDecryptCaesar, the first of three
+    ### composite functions that make up decryptCaesar
+    print(f"\nAll possible decryptions of the previously encrypted text:")
+    print(*bruteDecryptCaesar(encryptedText), sep="\n")
 
-### Testing testCaesarDecrypt, the second of three
-### composite functions that make up decryptCaesar
-print(f"\nAll possible decryptions of the previously encrypted text and their validities:")
-print(*testCaesarDecrypt(bruteDecryptCaesar(encryptedText)), sep="\n")
+    ### Testing testCaesarDecrypt, the second of three
+    ### composite functions that make up decryptCaesar
+    print(f"\nAll possible decryptions of the previously encrypted text and their validities:")
+    print(*testCaesarDecrypt(bruteDecryptCaesar(encryptedText)), sep="\n")
 
-### Testing grabLeastWrongCaesar, the third of three
-### composite functions that make up decryptCaesar
-print(f"\nMost likely decryption of the previously encrypted text and its shift value:")
-print(grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText))))
+    ### Testing grabLeastWrongCaesar, the third of three
+    ### composite functions that make up decryptCaesar
+    print(f"\nMost likely decryption of the previously encrypted text and its shift value:")
+    print(grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText))))
 
-### Testing decryptCaesar, the main function that compiles the results
-print(f"\nDecrypted text and its validity:")
-print(decryptCaesar(encryptedText))
+    ### Testing decryptCaesar, the main function that compiles the results
+    print(f"\nDecrypted text and its validity:")
+    print(decryptCaesar(encryptedText))
