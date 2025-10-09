@@ -1,12 +1,16 @@
 import os
 import string
 import time
+timeStart = time.time()
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # Finds all the files with word lists in the WordLists directory
 wordListFiles = os.listdir("WordLists")
 # Creates a set of all the words in the files in wordListFiles, all lowercase
-words = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
-
+allWordFiles = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
+print(len(allWordFiles))
+open("WordLists/allWords.txt", 'w').write('\n'.join(sorted(allWordFiles, key=len)))
+words = sorted(allWordFiles, key=len)
+print(len(words))
 chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
 
 # caesarCipher(integer, string, bool) -> string
@@ -208,3 +212,5 @@ if __name__ == "__main__":
     print("decryptCaesar(encryptedText)")
     decrypt = decryptCaesar(encryptedText)
     print(*decrypt, sep="\n")
+
+    print(f"\nExecution Time: {round(time.time() - timeStart, 2)} seconds")
