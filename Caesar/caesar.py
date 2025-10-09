@@ -185,26 +185,26 @@ if __name__ == "__main__":
     ### Testing bruteDecryptCaesar, the first of three
     ### composite functions that make up decryptCaesar
     print(f"\nAll possible decryptions of the previously encrypted text:")
-    print("bruteDecryptCaesar(encryptedText, debug=False)")
-    brute = bruteDecryptCaesar(encryptedText, debug=False)
+    print("bruteDecryptCaesar(encryptedText)")
+    brute = bruteDecryptCaesar(encryptedText)
     print(*brute, sep="\n")
 
     ### Testing testCaesarDecrypt, the second of three
     ### composite functions that make up decryptCaesar
     print(f"\nAll possible decryptions of the previously encrypted text and their validities:")
-    print("testCaesarDecrypt(bruteDecryptCaesar(encryptedText, debug=False), debug=False)")
-    test = testCaesarDecrypt(brute, debug=False)
+    print("testCaesarDecrypt(bruteDecryptCaesar(encryptedText))")
+    test = testCaesarDecrypt(brute)
     print(*test, sep="\n")
 
     ### Testing grabLeastWrongCaesar, the third of three
     ### composite functions that make up decryptCaesar
     print(f"\nMost likely decryption of the previously encrypted text and its shift value:")
-    print("grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText, debug=False), debug=False), debug=False)")
-    least = grabLeastWrongCaesar(test, debug=False)
+    print("grabLeastWrongCaesar(testCaesarDecrypt(bruteDecryptCaesar(encryptedText)))")
+    least = grabLeastWrongCaesar(test)
     print(*least, sep="\n")
 
     ### Testing decryptCaesar, the main function that compiles the results
     print(f"\nDecrypted text and its validity:")
-    print("decryptCaesar(encryptedText, debug=False)")
-    decrypt = decryptCaesar(encryptedText, debug=False)
+    print("decryptCaesar(encryptedText)")
+    decrypt = decryptCaesar(encryptedText)
     print(*decrypt, sep="\n")
