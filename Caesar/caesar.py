@@ -52,6 +52,7 @@ def caesarCipher(shift: int = 0,
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
 def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
+    debug = kwargs.get('debug', False)
     allSols = tuple(caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27))
     return allSols
 
@@ -67,6 +68,7 @@ def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
 def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
+    debug = kwargs.get('debug', False)
     results = []
     allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
@@ -91,6 +93,7 @@ def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
 def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
+    debug = kwargs.get('debug', False)
     returnStat = []
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
@@ -118,6 +121,7 @@ def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
 ## and grabLeastWrongCaesar. decryptCaesar removes the need
 ## for three different functions and nested calls.
 def decryptCaesar(shifted:str, **kwargs) -> str:
+    debug = kwargs.get('debug', False)
     # Setting empty lists
     allSols = []
     results = []
