@@ -2,15 +2,15 @@ import os
 import string
 import time
 timeStart = time.time()
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # Finds all the files with word lists in the WordLists directory
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 wordListFiles = os.listdir("WordLists")
 # Creates a set of all the words in the files in wordListFiles, all lowercase
 allWordFiles = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
-print(len(allWordFiles))
 open("WordLists/allWords.txt", 'w').write('\n'.join(sorted(allWordFiles, key=len)))
 words = sorted(allWordFiles, key=len)
-print(len(words))
+numWords = len(words)
+
 chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
 
 # caesarCipher(integer, string, bool) -> string
@@ -74,7 +74,7 @@ def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
 def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
     debug = kwargs.get('debug', False)
     results = []
-    allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
+    allPerms = [[attempt[i:j] for i in range(1,len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
     for attempt in allSols:
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
