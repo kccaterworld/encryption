@@ -2,15 +2,19 @@
 
 My repository for learning about encryption
 
-Currently 2 different algorithms I'm working on:
 Caesar: Caesar ciphers
 - Encrypts and decrypts ciphers
 - Can brute force to decrypt by comparing possible words to a database of English words
-- Uses two databases: [english-words](github.com/dwyl/english-words) by dwyl and [370k English words corpus](kaggle.com/datasets/ruchi798/part-of-speech-tagging) by Ruchi Bhatia
+- Uses a number on databases, compiled into one file: allWords.txt
+- GOALS:
+  - Include letter repetativeness for new validity score
+  - Weigh all three scores to get one big one?
+  - Improve efficiency (<10s?)
 
 RSA: RSA Encryption
 - Can encrypt and decrypt given e, d, and N
-- GOALS:
-  - Be able to read private and public key files and convert them into e, d, and N
-  - Be able to convert text data into numerical data
-    - This will likely emulate how pycryptodome does it
+- Formerly could read in key files/text, removed functionality
+- This is not to be used for actual encryption
+
+Hash: md5 hashing, soon to include sha1, sha256, sha512
+- Currently does not work
