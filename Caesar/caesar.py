@@ -7,8 +7,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 wordListFiles = os.listdir("WordLists")
 # Creates a set of all the words in the files in wordListFiles, all lowercase
 allWordFiles = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
-open("WordLists/allWords.txt", 'w').write('\n'.join(sorted(allWordFiles, key=len)))
-words = sorted(allWordFiles, key=len)
+#open("WordLists/allWords.txt", 'w').write('\n'.join(sorted(allWordFiles, key=len)))
+words = set(sorted(allWordFiles, key=len))
 numWords = len(words)
 
 chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
@@ -57,8 +57,20 @@ def caesarCipher(shift: int = 0,
 ## to decrypt a Caesar cipher with an unknown shift value.
 def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
     debug = kwargs.get('debug', False)
-    allSols = tuple(caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27))
-    return allSols
+    printOut = kwargs.get('print', False)
+    timeStart = time.time()
+    allSols = tuple((caesarCipher(shiftVal, shifted, False), shiftVal) for shiftVal in range(1, 27))
+    if not debug:
+        output:tuple[str,int] = tuple(sol[0] for sol in allSols)
+    if debug:
+        output:tuple[tuple[str,int]] = allSols
+    if printOut:
+        print(*output, sep='\n')
+        if debug: print(time.time() - timeStart)
+        return tuple(sol[0] for sol in allSols)
+    if not printOut:
+        if debug: print(time.time() - timeStart)
+        return tuple(sol[0] for sol in allSols)
 
 # testCaesarDecrypt(tuple) -> tuple
 # Takes in a tuple of all possible decryptions of a Caesar
@@ -72,10 +84,14 @@ def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
 def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
+    timeStart = time.time()
     debug = kwargs.get('debug', False)
+    printOut = kwargs.get('print', False)
+    print(time.time() - timeStart)
     results = []
-    allPerms = [[attempt[i:j] for i in range(1,len(attempt)) for j in range(i+1, len(attempt)+1)] for attempt in allSols]
+    allPerms = [[attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
+    print(time.time() - timeStart)
     for attempt in allSols:
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
         attemptList = attemptStrip.split()
@@ -85,7 +101,24 @@ def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
             if word.lower().strip() in words:
                 validWords += 1
         results.append((attempt, allPermsVals[allSols.index(attempt)], round(validWords / totalWords, 2)))
-    return results
+    if not debug:
+        output = results
+    if debug:
+        if len(results) != len(allPerms):
+            raise ValueError(f"Length of results ({len(results)}) and allPerms ({len(allPerms)}) do not match!")
+        if min([len(perm) for i in range(len(allPerms)) for perm in allPerms[i]]) < 2:
+            raise ValueError("Some permutations are too short!")
+        output = [(results[i], allPerms[i], [item for item in allPerms[i] if item in words]) for i in range(len(results))]
+    if printOut:
+        print(*output, sep='\n')
+        if debug: print(time.time() - timeStart)
+        if debug: return tuple(res[0] for res in output)
+        if not debug: return output
+    if not printOut:
+        if debug: print(time.time() - timeStart)
+        if debug: return tuple(res[0] for res in output)
+        if not debug: return output
+    return "How did we get here"
 
 
 # grabLeastWrongCaesar(tuple) -> str
@@ -98,19 +131,26 @@ def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
 ## to decrypt a Caesar cipher with an unknown shift value.
 def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
     debug = kwargs.get('debug', False)
+    printOut = kwargs.get('print', False)
+    timeStart = time.time()
     returnStat = []
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
     for value in highestValidities:
         returnStat.append(results[validities.index(value[1])][0])
     leastWrong = results[validities.index(max(validities))]
+
     if len(highestValidities) == 1:
-        return ("The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0],)
+        output = ("The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0],f"New Validity Score: {leastWrong[1]}\t\tOld Validity Score: {leastWrong[2]}")
     elif len(highestValidities) > 1:
         multHighest = [f"There were {len(highestValidities)} answers with similar probabilities:"]
         for answer in highestValidities:
             multHighest.append(f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}")
-        return multHighest
+        output = tuple(multHighest)
+    if debug: print(time.time() - timeStart)
+    if printOut:
+        print(*output, sep='\n')
+    return output
 
 # decryptCaesar(string) -> string
 # Takes in a string encrypted with a Caesar cipher,
@@ -126,20 +166,19 @@ def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
 ## for three different functions and nested calls.
 def decryptCaesar(shifted:str, **kwargs) -> str:
     debug = kwargs.get('debug', False)
-    # Setting empty lists
-    allSols = []
+    printOut = kwargs.get('print', False)
+    timeStart = time.time()
     results = []
-    returnStat = []
+    resDeb = []
     
-    # Adds every possible decryption to allSols,
-    # then changes it to a tuple to preserve data integrity
-    for shiftVal in range(1, 27):
-        allSols.append(caesarCipher(shiftVal, shifted, False))
-    allSols = tuple(allSols)
+    # Creates a tuple of every possible decryption
+    allSols = tuple([caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27)])
+    if debug: allSolsDeb = tuple([(caesarCipher(shiftVal, shifted, False), shiftVal) for shiftVal in range(1, 27)])
+    if debug and printOut: print(*allSolsDeb, sep='\n')
 
     # Checks validity of every word against web2List.txt,
     # and appends validity value to the decryption itself 
-    allPerms = [[attempt[i:j] for i in range(len(attempt)) for j in range(i, len(attempt))] for attempt in allSols]
+    allPerms = [[attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))] for attempt in allSols]
     allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
     for attempt in allSols:
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
@@ -150,20 +189,24 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
             if word.lower().strip() in words:
                 validWords += 1
         results.append((attempt, allPermsVals[allSols.index(attempt)], round(validWords / totalWords, 2)))
+    if debug: resDeb = [(results[i], allPerms[i], [item for item in allPerms[i] if item in words]) for i in range(len(results))]
+    if debug and printOut: print(*resDeb, sep='\n')
     
-    returnStat = []
+    
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
-    for value in highestValidities:
-        returnStat.append(results[validities.index(value[1])][0])
     leastWrong = results[validities.index(max(validities))]
     if len(highestValidities) == 1:
-        return "The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0]
+        output = ("The most likely answer had a shift of " + str(results.index(leastWrong) + 1) + ": " + leastWrong[0],f"New Validity Score: {leastWrong[1]}\t\tOld Validity Score: {leastWrong[2]}")
     elif len(highestValidities) > 1:
         multHighest = [f"There were {len(highestValidities)} answers with similar probabilities:"]
         for answer in highestValidities:
             multHighest.append(f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}")
-        return multHighest
+        output = tuple(multHighest)
+    if debug: print(time.time() - timeStart)
+    if printOut:
+        print(*output, sep='\n')
+    return output
     
 
 if __name__ == "__main__":
