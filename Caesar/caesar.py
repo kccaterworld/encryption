@@ -84,15 +84,14 @@ def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
 ## which is the main function that compiles the results
 ## to decrypt a Caesar cipher with an unknown shift value.
 def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
-    timeStart = time.time()
     debug = kwargs.get('debug', False)
     printOut = kwargs.get('print', False)
-    print(time.time() - timeStart)
-    results = []
-    allPerms = [[attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))] for attempt in allSols]
-    allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
-    print(time.time() - timeStart)
+    timeStart = time.time()
+    output = []
+    
     for attempt in allSols:
+        attPerms = [attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))]
+        attPermsVals = [1 for item in attPerms if item in words].count(1) / len(attPerms)
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
         attemptList = attemptStrip.split()
         validWords = 0
@@ -100,15 +99,9 @@ def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
         for word in attemptList:
             if word.lower().strip() in words:
                 validWords += 1
-        results.append((attempt, allPermsVals[allSols.index(attempt)], round(validWords / totalWords, 2)))
-    if not debug:
-        output = results
-    if debug:
-        if len(results) != len(allPerms):
-            raise ValueError(f"Length of results ({len(results)}) and allPerms ({len(allPerms)}) do not match!")
-        if min([len(perm) for i in range(len(allPerms)) for perm in allPerms[i]]) < 2:
-            raise ValueError("Some permutations are too short!")
-        output = [(results[i], allPerms[i], [item for item in allPerms[i] if item in words]) for i in range(len(results))]
+        if not debug: output.append((attempt, attPermsVals, round(validWords / totalWords, 2)))
+        if debug: output.append(((attempt, attPermsVals, round(validWords / totalWords, 2)), attPerms, [item for item in attPerms if item in words]))
+
     if printOut:
         print(*output, sep='\n')
         if debug: print(time.time() - timeStart)
@@ -178,9 +171,10 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
 
     # Checks validity of every word against web2List.txt,
     # and appends validity value to the decryption itself 
-    allPerms = [[attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))] for attempt in allSols]
-    allPermsVals = [([1 for item in sublist if item in words].count(1) / len(sublist)) for sublist in allPerms]
+    
     for attempt in allSols:
+        attPerms = [attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))]
+        attPermsVals = [1 for item in attPerms if item in words].count(1) / len(attPerms)
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
         attemptList = attemptStrip.split()
         validWords = 0
@@ -188,10 +182,9 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
         for word in attemptList:
             if word.lower().strip() in words:
                 validWords += 1
-        results.append((attempt, allPermsVals[allSols.index(attempt)], round(validWords / totalWords, 2)))
-    if debug: resDeb = [(results[i], allPerms[i], [item for item in allPerms[i] if item in words]) for i in range(len(results))]
+        results.append((attempt, attPermsVals, round(validWords / totalWords, 2)))
+        if debug: resDeb.append(((attempt, attPermsVals, round(validWords / totalWords, 2)), attPerms, [item for item in attPerms if item in words]))
     if debug and printOut: print(*resDeb, sep='\n')
-    
     
     validities = [attempt[1] for attempt in results]
     highestValidities = [attempt for attempt in results if attempt[1] == max(validities)]
@@ -257,3 +250,4 @@ if __name__ == "__main__":
     print(*decrypt, sep="\n")
 
     print(f"\nExecution Time: {round(time.time() - timeStart, 2)} seconds")
+    
