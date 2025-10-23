@@ -2,15 +2,18 @@ import os
 import string
 import time
 timeStart = time.time()
-# Finds all the files with word lists in the WordLists directory
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-wordListFiles = os.listdir("WordLists")
-# Creates a set of all the words in the files in wordListFiles, all lowercase
-allWordFiles = {word.lower() for wordList in wordListFiles for word in open(f"WordLists/{wordList}", 'r').read().split()}
-#open("WordLists/allWords.txt", 'w').write('\n'.join(sorted(allWordFiles, key=len)))
-words = set(sorted(allWordFiles, key=len))
-numWords = len(words)
 
+def compileWords(lenText = 0):
+    timeStart = time.time()
+    # Finds all the files with word lists in the WordLists directory
+    os.chdir(os.path.dirname(__file__))
+    # Creates a set of all the words in the files in wordListFiles, all lowercase
+    if lenText == 0:
+        allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split()}
+    if lenText > 0:
+        allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split() if len(word) <= lenText}
+    print("WORD LIST COMPILE TIME: " + str(time.time() - timeStart))
+    return set(allWordFiles)
 chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
 
 # caesarCipher(integer, string, bool) -> string
@@ -90,15 +93,12 @@ def testCaesarDecrypt(allSols:tuple, **kwargs) -> tuple[str, float]:
     output = []
     
     for attempt in allSols:
-        attPerms = [attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))]
-        attPermsVals = [1 for item in attPerms if item in words].count(1) / len(attPerms)
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
+        attPerms = [attemptStrip[i:j+1].lower() for i in range(len(attemptStrip)) for j in range(i+1, len(attemptStrip))]
+        attPermsVals = sum(1 for item in attPerms if item in words) / len(attPerms)
         attemptList = attemptStrip.split()
-        validWords = 0
         totalWords = len(attemptList)
-        for word in attemptList:
-            if word.lower().strip() in words:
-                validWords += 1
+        validWords = sum(1 for word in attemptList if word.lower() in words)
         if not debug: output.append((attempt, attPermsVals, round(validWords / totalWords, 2)))
         if debug: output.append(((attempt, attPermsVals, round(validWords / totalWords, 2)), attPerms, [item for item in attPerms if item in words]))
 
@@ -163,25 +163,20 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
     timeStart = time.time()
     results = []
     resDeb = []
-    
     # Creates a tuple of every possible decryption
     allSols = tuple([caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27)])
     if debug: allSolsDeb = tuple([(caesarCipher(shiftVal, shifted, False), shiftVal) for shiftVal in range(1, 27)])
     if debug and printOut: print(*allSolsDeb, sep='\n')
 
     # Checks validity of every word against web2List.txt,
-    # and appends validity value to the decryption itself 
-    
+    # and appends validity value to the decryption itself
     for attempt in allSols:
-        attPerms = [attempt[i:j+1].lower() for i in range(len(attempt)) for j in range(i+1, len(attempt))]
-        attPermsVals = [1 for item in attPerms if item in words].count(1) / len(attPerms)
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
+        attPerms = [attemptStrip[i:j+1].lower() for i in range(len(attemptStrip)) for j in range(i+1, len(attemptStrip))]
+        attPermsVals = sum(1 for item in attPerms if item in words) / len(attPerms)
         attemptList = attemptStrip.split()
-        validWords = 0
         totalWords = len(attemptList)
-        for word in attemptList:
-            if word.lower().strip() in words:
-                validWords += 1
+        validWords = sum(1 for word in attemptList if word.lower() in words)
         results.append((attempt, attPermsVals, round(validWords / totalWords, 2)))
         if debug: resDeb.append(((attempt, attPermsVals, round(validWords / totalWords, 2)), attPerms, [item for item in attPerms if item in words]))
     if debug and printOut: print(*resDeb, sep='\n')
@@ -206,7 +201,13 @@ if __name__ == "__main__":
     ## Setting text easily, as well as the shift value.
     shift = 13
     encryptedText = "Hello, World!"
-    text = caesarCipher(-shift, encryptedText, encrypt = True) 
+    text = caesarCipher(-shift, encryptedText, encrypt = True)
+
+    # Finds all the files with word lists in the WordLists directory
+    os.chdir(os.path.dirname(__file__))
+    # Creates a set of all the words in the files in wordListFiles, all lowercase
+    allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split() if len(word) <= len(encryptedText)}
+    words = set(allWordFiles)
 
     ## Testing encryption and decryption function, provided the shift is known.
     ### Testing encryption
@@ -246,8 +247,9 @@ if __name__ == "__main__":
     ### Testing decryptCaesar, the main function that compiles the results
     print(f"\nDecrypted text and its validity:")
     print("decryptCaesar(encryptedText)")
+    deTime = time.time()
     decrypt = decryptCaesar(encryptedText)
     print(*decrypt, sep="\n")
 
-    print(f"\nExecution Time: {round(time.time() - timeStart, 2)} seconds")
-    
+    print(f"\nExecution Time: {time.time() - timeStart} seconds")
+    print(f"Decryption Time: {time.time() - deTime} seconds")
