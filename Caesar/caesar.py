@@ -172,7 +172,7 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
     # and appends validity value to the decryption itself
     for attempt in allSols:
         attemptStrip = attempt.translate(str.maketrans('', '', chars))
-        attPerms = [attemptStrip[i:j+1].lower() for i in range(len(attemptStrip)) for j in range(i+1, len(attemptStrip))]
+        attPerms = [attemptStrip[i:j+1].lower() for i in range(min(len(attemptStrip), 31)) for j in range(i+1, min(len(attemptStrip), 32))]
         attPermsVals = sum(1 for item in attPerms if item in words) / len(attPerms)
         attemptList = attemptStrip.split()
         totalWords = len(attemptList)
@@ -195,18 +195,19 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
     if printOut:
         print(*output, sep='\n')
     return output
-    
+
 
 if __name__ == "__main__":
     ## Setting text easily, as well as the shift value.
     shift = 13
-    encryptedText = "Hello, World!"
-    text = caesarCipher(-shift, encryptedText, encrypt = True)
+    text = """dichlorodiphenyltrichloroethane"""
+    encryptedText = caesarCipher(shift, text, encrypt = True)
 
     # Finds all the files with word lists in the WordLists directory
     os.chdir(os.path.dirname(__file__))
     # Creates a set of all the words in the files in wordListFiles, all lowercase
     allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split() if len(word) <= len(encryptedText)}
+    global words
     words = set(allWordFiles)
 
     ## Testing encryption and decryption function, provided the shift is known.
@@ -234,7 +235,7 @@ if __name__ == "__main__":
     ### composite functions that make up decryptCaesar
     print(f"\nAll possible decryptions of the previously encrypted text and their validities:")
     print("testCaesarDecrypt(bruteDecryptCaesar(encryptedText))")
-    test = testCaesarDecrypt(brute)
+    test = testCaesarDecrypt(brute, print = True, debug = True)
     print(*test, sep="\n")
 
     ### Testing grabLeastWrongCaesar, the third of three
