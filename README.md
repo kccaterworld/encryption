@@ -6,10 +6,11 @@ Caesar: Caesar ciphers
 - Encrypts and decrypts ciphers
 - Can brute force to decrypt by comparing possible words to a database of English words
 - Uses a number on databases, compiled into one file: allWords.txt
+- Currently as fast as possible (<1ms for short ciphertexts)
 - GOALS:
   - Include letter repetativeness for new validity score
   - Weigh all three scores to get one big one?
-  - Improve efficiency (<10s?)
+  - Reduce memory usage (able to take a few gigabytes of text as ciphertext?)
 
 RSA: RSA Encryption
 - Can encrypt and decrypt given e, d, and N
