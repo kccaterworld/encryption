@@ -27,8 +27,8 @@ chars = "!?.,'_-;:\"()[]{}<>@#$%^&*~`+=/\\|\n\r\t"
 # Encrypt = true to shift forward and encrypt the string.
 # Decrypt = false to shift backward and decrypt the string.
 # Decrypt just recursively calls caesarCipher with a negative shift value.
-def caesarCipher(shift: int = 0,
-                 text:str = "",
+def caesarCipher(text:str = "",
+                 shift: int = 0,
                  encrypt:bool = True) -> str | tuple:
     shifted = ""
     if encrypt:
@@ -47,7 +47,7 @@ def caesarCipher(shift: int = 0,
                 continue
         return shifted
     if not encrypt:
-        return caesarCipher(-shift, text, True)
+        return caesarCipher(text, -shift, True)
     
 # bruteDecryptCaesar(string) -> tuple
 # Takes in a string encrypted with a Caesar cipher
@@ -138,7 +138,7 @@ def grabLeastWrongCaesar(results:tuple, **kwargs) -> tuple:
     elif len(highestValidities) > 1:
         multHighest = [f"There were {len(highestValidities)} answers with similar probabilities:"]
         for answer in highestValidities:
-            multHighest.append(f"{answer[0]}\t\tNew Validity Score: {answer[1]}\t\tOld Validity Score: {answer[2]}")
+            multHighest.append(({answer[0]},f"\t\tNew Validity Score: {answer[1]}", f"\t\tOld Validity Score: {answer[2]}"))
         output = tuple(multHighest)
     if debug: print(time.time() - timeStart)
     if printOut:
@@ -164,8 +164,8 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
     results = []
     resDeb = []
     # Creates a tuple of every possible decryption
-    allSols = tuple([caesarCipher(shiftVal, shifted, False) for shiftVal in range(1, 27)])
-    if debug: allSolsDeb = tuple([(caesarCipher(shiftVal, shifted, False), shiftVal) for shiftVal in range(1, 27)])
+    allSols = tuple([caesarCipher(shift=shiftVal, text=shifted, encrypt=False) for shiftVal in range(1, 27)])
+    if debug: allSolsDeb = tuple([(caesarCipher(shift=shiftVal, text=shifted, encrypt=False), shiftVal) for shiftVal in range(1, 27)])
     if debug and printOut: print(*allSolsDeb, sep='\n')
 
     # Checks validity of every word against web2List.txt,
@@ -196,19 +196,21 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
         print(*output, sep='\n')
     return output
 
+shift = 13
+text = """dichlorodiphenyltrichloroethane"""
+encryptedText = caesarCipher(text, shift, encrypt = True)
+# Finds all the files with word lists in the WordLists directory
+os.chdir(os.path.dirname(__file__))
+# Creates a set of all the words in the files in wordListFiles, all lowercase
+allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split() if len(word) <= len(encryptedText)}
+global words
+words = set(allWordFiles)
 
 if __name__ == "__main__":
     ## Setting text easily, as well as the shift value.
     shift = 13
-    text = """dichlorodiphenyltrichloroethane"""
+    text = open("hugetext.txt", "r").read()
     encryptedText = caesarCipher(shift, text, encrypt = True)
-
-    # Finds all the files with word lists in the WordLists directory
-    os.chdir(os.path.dirname(__file__))
-    # Creates a set of all the words in the files in wordListFiles, all lowercase
-    allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').read().split() if len(word) <= len(encryptedText)}
-    global words
-    words = set(allWordFiles)
 
     ## Testing encryption and decryption function, provided the shift is known.
     ### Testing encryption
