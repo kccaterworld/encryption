@@ -1,7 +1,6 @@
 import os
 import string
 import time
-timeStart = time.time()
 
 def compileWords(lenText = 0):
     timeStart = time.time()
@@ -196,6 +195,8 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
         print(*output, sep='\n')
     return output
 
+
+timeStart = time.time()
 shift = 13
 text = """dichlorodiphenyltrichloroethane"""
 encryptedText = caesarCipher(text, shift, encrypt = True)
