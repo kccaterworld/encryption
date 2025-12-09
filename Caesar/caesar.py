@@ -61,7 +61,7 @@ def bruteDecryptCaesar(shifted:str, **kwargs) -> tuple:
     debug = kwargs.get('debug', False)
     printOut = kwargs.get('print', False)
     timeStart = time.time()
-    allSols = tuple((caesarCipher(shiftVal, shifted, False), shiftVal) for shiftVal in range(1, 27))
+    allSols = tuple((caesarCipher(shifted, shiftVal, False), shiftVal) for shiftVal in range(1, 27))
     if not debug:
         output:tuple[str,int] = tuple(sol[0] for sol in allSols)
     if debug:
@@ -197,8 +197,8 @@ def decryptCaesar(shifted:str, **kwargs) -> str:
 
 
 timeStart = time.time()
-shift = 13
-text = """dichlorodiphenyltrichloroethane"""
+shift = 3
+text = """Hello World!"""
 encryptedText = caesarCipher(text, shift, encrypt = True)
 # Finds all the files with word lists in the WordLists directory
 os.chdir(os.path.dirname(__file__))
@@ -207,23 +207,21 @@ allWordFiles = {word.lower() for word in open("WordLists/allWords.txt", 'r').rea
 global words
 words = set(allWordFiles)
 
-if __name__ == "__main__":
+if __name__ == "__man__":
     ## Setting text easily, as well as the shift value.
-    shift = 13
-    text = open("hugetext.txt", "r").read()
-    encryptedText = caesarCipher(shift, text, encrypt = True)
+    encryptedText = caesarCipher(shift=shift, text=text, encrypt = True)
 
     ## Testing encryption and decryption function, provided the shift is known.
     ### Testing encryption
     print(f"Encrypting '{text}' with a shift of {shift}:")
     print("caesarCipher(shift, text, encrypt = True)")
-    print(f"Test:   " + caesarCipher(shift, text, encrypt = True))
+    print(f"Test:   " + caesarCipher(shift=shift, text=text, encrypt = True))
     print(f"Actual: {encryptedText}")
 
     ### Testing decryption
     print(f"\nDecrypting the previously encrypted text:")
     print("caesarCipher(shift, encryptedText, encrypt = False)")
-    print(f"Test:   " + caesarCipher(shift, encryptedText, encrypt = False))
+    print(f"Test:   " + caesarCipher(shift=shift, text=text, encrypt = True))
     print(f"Actual: {text}")
 
     ## Testing the solving function
@@ -257,3 +255,11 @@ if __name__ == "__main__":
 
     print(f"\nExecution Time: {time.time() - timeStart} seconds")
     print(f"Decryption Time: {time.time() - deTime} seconds")
+
+timeNow = time.time()
+plaintext = "Hello, World!"
+compileWords(len(plaintext))
+print(f"{(time.time() - timeNow) * 1000} milliseconds")
+ciphertext = caesarCipher(plaintext, 3, True)
+print(f"Ciphertext: {ciphertext}")
+print(f"{(time.time() - timeNow) * 1000} milliseconds")
